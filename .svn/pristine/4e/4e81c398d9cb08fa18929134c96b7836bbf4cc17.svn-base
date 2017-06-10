@@ -1,0 +1,72 @@
+package view;
+
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+
+
+/**
+ * 
+ * 
+ * RESEARCH FOCUS LISTENERS.
+ * 
+ * 
+ * 
+ * @author Patrick
+ *
+ */
+
+
+
+
+
+
+
+
+public class MenuBar extends JMenuBar {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 4231304967321746399L;
+    //private List label;
+    private JFrame myFrame;
+    
+    public MenuBar(final JFrame theFrame) {
+        myFrame = theFrame;
+        start();
+    }
+
+    private void start() {
+        add(info());
+        
+    }
+    private JMenu info() {
+        JButton button = new JButton("Controls");
+        StringBuilder sb = new StringBuilder(100);
+        sb.append("MOVE LEFT: Left Arrow\nMOVE RIGHT: Right Arrow\n");
+        sb.append("ROTATE COUNTER CLOCKWISE: A\n");
+        sb.append("ROTATE CLOCKWISE: D\nDROP: Space");
+        final JMenu info = new JMenu("Controls");
+        info.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent arg0) {
+                JOptionPane.showMessageDialog(myFrame, sb, "Controls", JOptionPane.INFORMATION_MESSAGE);
+                
+            }
+            
+        });
+        return info;
+    }
+
+
+}

@@ -1,0 +1,32 @@
+package main;
+
+import java.awt.EventQueue;
+
+import view.TetrisGUI;
+/**
+ * 
+ * @author Patrick
+ * @version 1.0
+ *
+ */
+public final class TetrisMain {
+    /**
+     * 
+     */
+    private TetrisMain() {
+        //Blank
+    }
+    /**
+     * 
+     * @param theArgs 
+     */
+    public static void main(final String[] theArgs) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new TetrisGUI();
+            }
+        });
+
+    }
+
+}

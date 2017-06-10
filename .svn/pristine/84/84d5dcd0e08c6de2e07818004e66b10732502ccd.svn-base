@@ -1,0 +1,127 @@
+package view;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Observable;
+import java.util.Observer;
+import javax.swing.Timer;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import model.Board;
+
+/**
+ * 
+ * @author Patrick Stevens
+ * @version 1.0
+ *
+ */
+public class TetrisGUI implements Observer {
+    /**
+     * 
+     */
+    private final JFrame myFrame;
+    /**
+     * 
+     */
+    private final Board myBoard;
+    private NextPiecePanel myNext;
+    private Timer myTimer;
+    private KeyListener myListen;
+
+
+    /**
+     * 
+     */
+    public TetrisGUI() {
+        myFrame = new JFrame("Tetris");
+        myBoard = new Board();
+        myNext = new NextPiecePanel(myBoard);
+        myListen = new KeyListener(myBoard);
+        
+
+        start();
+    }
+    /**
+     * 
+     */
+    private void start() {
+        setTimer();
+        final MenuBar menuBar = new MenuBar(myFrame);
+        final ImageIcon image = new ImageIcon("images/tetris2.jpg");
+        myFrame.setIconImage(image.getImage());
+        
+        final BoardPanel board = new BoardPanel();
+        myBoard.addObserver(board);
+        //myBoard.addObserver(this);
+        final JPanel next = new JPanel();
+        next.add(myNext, BorderLayout.EAST);
+        //info.setPreferredSize(new Dimension(200, 550));
+        //info.add(myControl, BorderLayout.SOUTH);
+        
+        //info.add(controlButton(),BorderLayout.SOUTH);
+        myFrame.addKeyListener(myListen);
+        //myFrame.setJMenuBar(menuBar);
+        
+        myFrame.add(next, BorderLayout.EAST);
+        myFrame.add(board, BorderLayout.CENTER);
+        //myFrame.add(myControl, BorderLayout.NORTH);
+        
+        myFrame.setSize(new Dimension(350, 489));
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setBackground(Color.RED);
+        myFrame.setResizable(false);
+        
+        myTimer.start();
+        myBoard.newGame();
+        myFrame.setVisible(true);
+        
+        controlButton();
+
+    }
+    
+    //Need to research more on focus listeners.
+    
+    private void controlButton() {
+        //JButton button = new JButton("Controls");
+        StringBuilder sb = new StringBuilder(100);
+        sb.append("MOVE LEFT: Left Arrow\nMOVE RIGHT: Right Arrow\n");
+        sb.append("ROTATE COUNTER CLOCKWISE: A\n");
+        sb.append("ROTATE CLOCKWISE: D\nDROP DOWN 1: Down Arrow\nDROP: Space");
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent arg0) {
+        JOptionPane.showMessageDialog(myFrame, sb, "Controls", JOptionPane.INFORMATION_MESSAGE);
+//                
+//            }
+//            
+//        });
+
+    }
+    /**
+     * 
+     */
+    private void setTimer() {
+        myTimer = new Timer(500, new ActionListener() {
+            
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                    myBoard.step();
+            }
+        });
+    }
+    private void gameOver() {
+
+    }
+
+    @Override
+    public void update(Observable theBoard, Object theObject) {
+    }
+}
+    

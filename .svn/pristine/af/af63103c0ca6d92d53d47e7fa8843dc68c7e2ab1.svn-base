@@ -1,0 +1,63 @@
+package view;
+
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
+import javax.swing.Timer;
+
+import model.Board;
+
+/**
+ * 
+ * @author Patrick Stevens
+ * @version 1.0
+ *
+ */
+public class KeyListener extends KeyAdapter {
+    /**
+     * 
+     */
+    private final Board myBoard;
+    /**
+     * 
+     * @param theBoard 
+     */
+    public KeyListener(final Board theBoard) {
+        super();
+        myBoard = theBoard;
+
+    }
+    
+    @Override
+    public void keyPressed(final KeyEvent theEvent) {
+        switch (theEvent.getKeyCode()) {
+            case KeyEvent.VK_D:
+                myBoard.right();
+                break;
+                
+            case KeyEvent.VK_A:
+                myBoard.left();
+                break;
+            
+            case KeyEvent.VK_S:
+                myBoard.down();
+                break;
+                
+            case KeyEvent.VK_SPACE:
+                myBoard.drop();
+                break;
+                
+            case KeyEvent.VK_W:
+                myBoard.rotateCCW();
+                break;
+            
+            case KeyEvent.VK_E:
+                myBoard.rotateCW();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+}

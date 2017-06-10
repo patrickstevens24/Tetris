@@ -1,0 +1,152 @@
+package view;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Random;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import model.Board;
+import model.Point;
+import model.TetrisPiece;
+/**
+ * 
+ * @author Patrick
+ * @version 1.0
+ * 
+ */
+public class NextPiecePanel extends JPanel implements Observer {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 168426035370641970L;
+    /**
+     * 
+     */
+    private TetrisPiece myNextPiece;
+    /**
+     * 
+     */
+    private Point[] myPoint;
+    /**
+     * 
+     */
+    private Board myBoard;
+    private int myCompleted;
+    private int myTotalCompleted;
+    private int myScore;
+    private int myFrozenScore;
+    
+    
+    /**
+     * 
+     * @param theBoard 
+     */
+    public NextPiecePanel(final Board theBoard) {
+        
+        super();
+        myFrozenScore = -1;
+        myCompleted = 0;
+        myScore = 0;
+        myBoard = theBoard;
+        myBoard.addObserver(this);
+        setPreferredSize(new Dimension(100, 450));
+        setBackground(Color.GRAY);
+        
+    }
+    @Override
+    public void paintComponent(final Graphics theGraphics) {
+        super.paintComponent(theGraphics);
+        final Graphics2D g2d = (Graphics2D) theGraphics;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                             RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        
+        g2d.setColor(Color.WHITE);
+        g2d.drawString("SCORE", 27, 320);
+        g2d.drawString(gameScore(), 3, 370);
+        g2d.drawString(clearedLines(), 3, 350);
+        
+        
+        
+        final Random random = new Random();
+        final int red = random.nextInt(256);
+        final int green = random.nextInt(256);
+        final int blue = random.nextInt(256);
+        
+        g2d.drawString("NEXT PIECE", 15, 115);
+        
+        final Color randomColor = new Color(red, green, blue);
+        if (myNextPiece != null) {
+            myPoint = myNextPiece.getPoints();
+            for (int i = 0; i < myPoint.length; i++) {
+                
+                g2d.setPaint(randomColor);
+                g2d.fillRect((int) (myPoint[i].x() * 20 + getWidth() / 5.5), 
+                             getHeight()- myPoint[i].y() * 20 - 350, 19, 19);
+
+                
+            }
+        }
+    }
+    protected void resetScore() {
+        myScore = 0;
+        myTotalCompleted = 0;
+        myFrozenScore = -2;
+        myCompleted = 0;
+        repaint();
+    }
+    
+    private String gameScore() {
+        
+        if (myCompleted >= 1) {
+            
+            myScore += 40;
+        } 
+        if (myFrozenScore >= 0) {
+            myScore += myFrozenScore * 4;
+        }
+        myFrozenScore = 0;
+
+        
+        return "Score: " + myScore;
+    }
+    /**
+     * 
+     * @return String of completed lines
+     */
+    private String clearedLines() {
+        if (myCompleted >= 1) {
+            myTotalCompleted += myCompleted;
+        }
+        myCompleted = 0;
+        return "Cleared Lines: " + myTotalCompleted;
+    }
+
+    @Override
+    public void update(final Observable theBoard, final Object theObject) {
+        if (theBoard instanceof Board) {
+            if (theObject instanceof TetrisPiece) {
+                myNextPiece = (TetrisPiece) theObject; 
+                repaint();
+                myFrozenScore++;
+            } else if (theObject instanceof List<?>) {
+                repaint();
+            } else if (theObject instanceof Boolean) {
+                repaint();
+            } else {
+                myCompleted = ((Object[]) theObject).length;
+            }
+        }
+    }
+}

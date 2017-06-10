@@ -1,0 +1,358 @@
+package view;
+
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+
+
+
+
+
+
+
+
+import model.Board;
+
+
+/**
+ * 
+ * @author Patrick Stevens
+ * @version 1.0
+ *
+ */
+public class TetrisGUI implements Observer {
+    /**
+     * 
+     */
+    private static final int INITIAL_DELAY = 750;
+    /**
+     * 
+     */
+    private static final Dimension DEFAULT_SIZE = new Dimension(350, 533);
+    /**
+     * 
+     */
+    private static final int LEVEL_DELAY = 75;
+    /**
+     * 
+     */
+    private static int myDelay;
+    /**
+     * 
+     */
+    private static Timer myTimer;
+    /**
+     * 
+     */
+    private final JFrame myFrame;
+    /**
+     * 
+     */
+    private final Board myBoard;
+    /**
+     * 
+     */
+    private final SidePanel myNext;
+    /**
+     * 
+     */
+    private final KeyListener myListen;
+    /**
+     * 
+     */
+    private JMenuItem myNewGame;
+    /**
+     * 
+     */
+    private final BottomPanel myScore;
+    /**
+     * 
+     */
+    private final Pause myPauseListen;
+
+
+
+
+    /**
+     * 
+     */
+    public TetrisGUI() {
+        myFrame = new JFrame("Tetris");
+        myBoard = new Board();
+        myNext = new SidePanel(myBoard);
+        myListen = new KeyListener(myBoard);
+        myScore = new BottomPanel();
+        myPauseListen = new Pause();
+
+        start();
+    }
+    /**
+     * 
+     */
+    private void start() {
+        myDelay = INITIAL_DELAY;
+        myTimer = new Timer(INITIAL_DELAY, new SetTimer());
+        final ImageIcon image = new ImageIcon("images/tetris2.jpg");
+        myFrame.setIconImage(image.getImage());
+        
+        final BoardPanel board = new BoardPanel();
+        myBoard.addObserver(board);
+        myBoard.addObserver(this);
+        final JPanel next = new JPanel();
+        next.add(myNext, BorderLayout.NORTH);
+
+        myFrame.addKeyListener(myListen);
+        myFrame.addKeyListener(myPauseListen); 
+        myFrame.setJMenuBar(menuBar());
+        
+        myFrame.add(next, BorderLayout.EAST);
+        myFrame.add(board, BorderLayout.CENTER);
+        myFrame.add(myScore, BorderLayout.SOUTH);
+
+        
+        myFrame.setSize(DEFAULT_SIZE);
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setBackground(Color.RED);
+        myFrame.setResizable(false);
+        
+        myTimer.start();
+        myBoard.newGame();
+        myFrame.setVisible(true);
+        
+
+    }
+    
+
+
+    /**
+     * 
+     */
+    private void pauseGame() {
+        if (myTimer.isRunning()) {
+            myTimer.stop();
+            JOptionPane.showMessageDialog(myFrame, "Paused", "PAUSED", 
+                                          JOptionPane.INFORMATION_MESSAGE);
+            myFrame.removeKeyListener(myListen);
+        } else {
+            myTimer.start();
+            myFrame.addKeyListener(myListen);
+        }
+    }
+    /**
+     * 
+     * @return the menuBar
+     */
+    private JMenuBar menuBar() {
+        final JMenuBar menu = new JMenuBar();
+        final JMenu file = new JMenu("File");
+        file.add(newGame());
+        file.add(endGame());
+        file.add(exitGame());
+        
+        final JMenu info = new JMenu("Info");
+        info.add(scoreWork());
+        info.add(controlWork());
+        
+        menu.add(file);
+        menu.add(info);
+
+
+        return menu;
+        
+    }
+    /**
+     * 
+     * @return Controls info
+     */
+    private JMenuItem controlWork() {
+        final JMenuItem control = new JMenuItem("Controls");
+        
+        final StringBuilder sb = new StringBuilder(135);
+        sb.append("\tMOVE LEFT:  A\nMOVE RIGHT:  D\nDROP ONE:  S\n"
+                        + "ROTATE CCW:  W\nROTATE CW:  E"
+                        + "\nDROP:  Space");
+        
+        control.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                JOptionPane.showMessageDialog(myFrame, sb, "CONTROLS", 
+                                              JOptionPane.INFORMATION_MESSAGE);
+            }
+            
+        });
+        return control;
+    }
+    /**
+     * 
+     * @return Score info
+     */
+    private JMenuItem scoreWork() {
+        final JMenuItem score = new JMenuItem("How Scoring Works");
+        final StringBuilder sb = new StringBuilder(219);
+        sb.append("For the number of lines completed\nthe scoring is as follows...\n\n"
+                        + "Lines:     1            2             3               4\n\n"
+                        + "Level N:   40xN    100xN   300xN   1200xN\n"
+                        + "\n*You must complete 4 rows to move to next level*");
+        score.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                JOptionPane.showMessageDialog(myFrame, sb, "HOW SCORING WORKS", 
+                                              JOptionPane.INFORMATION_MESSAGE);
+            }
+            
+        });
+        return score;
+    }
+    /**
+     * 
+     * @return the exit action
+     */
+    private JMenuItem exitGame() {
+        final JMenuItem exit = new JMenuItem("Exit");
+        exit.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myFrame.dispatchEvent(new WindowEvent(myFrame,
+                                                          WindowEvent.WINDOW_CLOSING));
+            }
+            
+        });
+        return exit;
+    }
+    /**
+     * 
+     */
+    private void endAction() {
+        myTimer.stop();
+        JOptionPane.showMessageDialog(myFrame, "Game Over", "GAME OVER", 
+                                      JOptionPane.INFORMATION_MESSAGE);
+        myFrame.removeKeyListener(myListen);
+        myNewGame.setEnabled(true);
+    }
+    /**
+     * 
+     * @return the endgame action
+     */
+    private JMenuItem endGame() {
+        final JMenuItem end = new JMenuItem("End Game");
+        end.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                endAction();
+            }
+        });
+        return end;
+    }
+    /**
+     * 
+     */
+    private void newGameAction() {
+        myNext.resetScore();
+        myBoard.newGame();
+        myTimer.start();
+        myFrame.addKeyListener(myListen);
+        myDelay = INITIAL_DELAY;
+        myNewGame.setEnabled(false);
+    }
+    
+    
+    /**
+     * 
+     * @return the newgame action
+     */
+    private JMenuItem newGame() {
+        myNewGame = new JMenuItem("New Game");
+        myNewGame.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                newGameAction();
+            }
+        });
+       
+        return myNewGame;
+        
+    }
+    /**
+     * 
+     */
+    protected static void levelUp() {
+        myDelay -= LEVEL_DELAY;
+        myTimer.setDelay(myDelay);       
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public void update(final Observable theBoard, final Object theObject) {
+        if (theBoard instanceof Board) {
+            if (theObject instanceof Boolean) {
+                if ((boolean) theObject) {
+                    endAction();
+                    myNewGame.setEnabled(true);
+                }
+            }
+        } 
+    }
+    /**
+     * 
+     * @author Patrick Stevens
+     *
+     */
+    private class SetTimer implements ActionListener {
+        /**
+         * 
+         */
+        @Override
+        public void actionPerformed(final ActionEvent theEvent) {
+            myBoard.step();
+            myNewGame.setEnabled(false);     
+        }
+    }
+    /**
+     * 
+     * @author Patrick
+     *
+     */
+    public class Pause extends KeyAdapter {
+        /**
+         * 
+         * @param theE
+         * 
+         */
+        @Override
+        public void keyPressed(final KeyEvent theE) {
+            if (theE.getKeyCode() == KeyEvent.VK_P) {
+                
+                pauseGame();
+            }
+        }
+    }
+    
+
+}
+    
